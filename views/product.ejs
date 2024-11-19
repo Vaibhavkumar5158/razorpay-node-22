@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Razorpay Web-Integration</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+  <style>
+    /* General body styling */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #121212;
+    color: white;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Container styling */
+.container {
+    display: flex;
+    gap: 20px;
+}
+
+/* Card styling */
+.card {
+    background-color: #1e1e1e;
+    border: 2px solid #00ff00;
+    border-radius: 10px;
+    padding: 20px;
+    width: 300px;
+    text-align: center;
+}
+
+/* Card heading */
+.card h2 {
+    margin-bottom: 10px;
+    color: white;
+}
+
+/* Card price */
+.card p {
+    font-size: 24px;
+    font-weight: bold;
+    color: #00ff00;
+    margin: 10px 0;
+}
+
+/* List styling */
+.card ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 10px 0;
+    text-align: left;
+}
+
+.card ul li {
+    margin: 5px 0;
+}
+
+/* Join button styling */
+.card button {
+    background-color: transparent;
+    color: #00ff00;
+    border: 2px solid #00ff00;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.card button:hover {
+    background-color: #00ff00;
+    color: black;
+    transition: 0.3s;
+}
+
+/* Buy now link styling */
+.buy-now {
+    display: none; /* Hidden by default */
+    margin-top: 10px;
+}
+
+.buy-now a {
+    color: #00ff00;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.buy-now a:hover {
+    text-decoration: underline;
+}
+
+  </style>
+</head>
+
+<body>
+   
+        <!-- PRO  -->
+        <div class="container">
+            <!-- Basic Plan -->
+            <div class="card">
+                <h2>BASIC</h2>
+                <p>₹1500/Month</p>
+                <ul>
+                    <li>Smart workout plan</li>
+                    <li>At home workouts</li>
+                </ul>
+                <form class="pay-form">
+                    <input type="hidden" name="name" value="Shirt">
+                    <input type="hidden" name="amount" value="500">
+                    <input type="hidden" name="description" value="Shirt Buying">
+                    <input type="submit" value="Pay Now">
+                </form>
+            </div>
+    
+            <!-- Pro Plan -->
+            <div class="card">
+                <h2>PRO</h2>
+                <p>₹3000/Month</p>
+                <ul>
+                    <li>Pro GYMS</li>
+                    <li>Smart workout plan</li>
+                    <li>At home workouts</li>
+                </ul>
+                <form class="pay-form">
+                    <input type="hidden" name="name" value="Shirt">
+                    <input type="hidden" name="amount" value="500">
+                    <input type="hidden" name="description" value="Shirt Buying">
+                    <input type="submit" value="Pay Now">
+                </form>
+            </div>
+    
+            <!-- Premium Plan -->
+            <div class="card">
+                <h2>PREMIUM</h2>
+                <p>₹500/Month</p>
+                <ul>
+                    <li>ELITE Gyms & Classes</li>
+                    <li>Pro GYMS</li>
+                    <li>Smart workout plan</li>
+                    <li>At home workouts</li>
+                    <li>Personal Training</li>
+                </ul>
+                <form class="pay-form">
+                    <input type="hidden" name="name" value="Shirt">
+                    <input type="hidden" name="amount" value="500">
+                    <input type="hidden" name="description" value="Shirt Buying">
+                    <input type="submit" value="Pay Now">
+                </form>
+            </div>
+        </div>
+
+</body>
+
+</html>
+
+
+<!--Inside index.html -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+
+$(document).ready(function(){
+	$('.pay-form').submit(function(e){
+		e.preventDefault();
+
+		var formData = $(this).serialize();
+
+		$.ajax({
+			url:"/createOrder",
+			type:"POST",
+			data: formData,
+			success:function(res){
+				if(res.success){
+					var options = {
+						"key": ""+res.key_id+"",
+						"amount": ""+res.amount+"",
+						"currency": "INR",
+						"name": ""+res.product_name+"",
+						"description": ""+res.description+"",
+						"image": "https://dummyimage.com/600x400/000/fff",
+						"order_id": ""+res.order_id+"",
+						"handler": function (response){
+							alert("Payment Succeeded");
+							// window.open("/","_self")
+						},
+						"prefill": {
+							"contact":""+res.contact+"",
+							"name": ""+res.name+"",
+							"email": ""+res.email+""
+						},
+						"notes" : {
+							"description":""+res.description+""
+						},
+						"theme": {
+							"color": "#2300a3"
+						}
+					};
+					var razorpayObject = new Razorpay(options);
+					razorpayObject.on('payment.failed', function (response){
+							alert("Payment Failed");
+					});
+					razorpayObject.open();
+				}
+				else{
+					alert(res.msg);
+				}
+			}
+		})
+
+	});
+});
+
+</script>
